@@ -8,7 +8,7 @@ Installation
 
 Then copy/paste/type this (it may take a minute to build the package registry the first time):
 
-pip install git+https://github.com/xiaomingk/Agent.git
+pip install git+https://github.com/xiaomingk/Simpleagent.git
 
 Running the model
 
