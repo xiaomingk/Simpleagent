@@ -7,17 +7,17 @@ from itertools import repeat
 from operator import itemgetter 
 import random
 
-    
-    
-def func_ABM(numyears, hr_input,data_file):
-    def func_read_in_data(data_file):
+def func_read_in_data(data_file):
     # ~ df_slice_params = pd.read_excel("slice_param.xlsx",sheet_name="slice_params",header=0,index_col=0)
         data_slice_params = pd.read_excel(data_file,sheet_name="slice_params",header=0,index_col=0)
         data_initial_pp = pd.read_excel(data_file,sheet_name="input_initial_500",header=1)
         data_new_pp = pd.read_excel(data_file,sheet_name="new_pp",header=1)
 
         return data_slice_params,data_initial_pp,data_new_pp
-
+    
+    
+def func_ABM(numyears, hr_input,data_file):
+    
     slice_data,data_initial_pp,data_new_pp= func_read_in_data(data_file)
     #part 1. parameters of power plants.
     """
@@ -226,7 +226,7 @@ def func_ABM(numyears, hr_input,data_file):
             if invest_made is None:
                 if (dicommision_list['lifetime_remain']==0).any():##if more pp needs to be retired this year.
                     continue
-                else:c
+                else:
                     ts +=1 ##move to next step/year
                     # ~ rounds = 0
                     break 
@@ -254,4 +254,3 @@ def func_ABM(numyears, hr_input,data_file):
     
 
 capacity_mix = func_ABM(numyears=20, hr_input=[0.06,0.08,0.10],data_file="abm_data.xlsx")
-
