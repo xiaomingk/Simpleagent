@@ -12,11 +12,11 @@ pip install git+https://github.com/xiaomingk/Simpleagent.git
 
 Running the model
 
-To simulate 10 years using default parameters:
+To simulate N years using different hurdle rates [R1,R2,R3]:
 
 import Agent
 
-Agent.Results()
+Agent.func_ABM(N, [R1,R2,R3],data_file)
 
 Then examine the output variables capac and invest. Capacities are in MW with one row per year and one column per technology, in the order [wind, solar, nuclear, coal, gas]. Investments are listed with one row per plant investment, so several investments may take place each year. Investments with negative years represent the existing energy system at the beginning of the simulation at year 1.
 
