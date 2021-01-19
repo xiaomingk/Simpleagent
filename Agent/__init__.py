@@ -7,8 +7,17 @@ from itertools import repeat
 from operator import itemgetter 
 import random
 
+def func_read_in_data(data_file):
+    # ~ df_slice_params = pd.read_excel("slice_param.xlsx",sheet_name="slice_params",header=0,index_col=0)
+    data_slice_params = pd.read_excel(data_file,sheet_name="slice_params",header=0,index_col=0)
+    data_initial_pp = pd.read_excel(data_file,sheet_name="input_initial_500",header=1)
+    data_new_pp = pd.read_excel(data_file,sheet_name="new_pp",header=1)
 
-def func_ABM(numyears, hr_input):
+    return data_slice_params,data_initial_pp,data_new_pp
+    
+    
+def func_ABM(numyears, hr_input,data_file):
+    slice_data,data_initial_pp,data_new_pp= func_read_in_data(data_file)
     #part 1. parameters of power plants.
     """
     # ~ capacity ## unit:KWe
@@ -39,7 +48,7 @@ def func_ABM(numyears, hr_input):
             NPV_rate[(pp, hr)] = (1-(1+hr)**(-1*lifetime[pp]))/ hr
     ##================================================
     #part 3. parameters of time slice, demand elesticity and carbon price.
-    df_slice_params = pd.read_excel("slice_param.xlsx",sheet_name="slice_params",header=0,index_col=0)
+    df_slice_params= slice_data
     demand_level = df_slice_params.loc['demand_level'].values
     slice_hours = df_slice_params.loc['slice_hours'].values
 
@@ -130,11 +139,11 @@ def func_ABM(numyears, hr_input):
     # =============================================================================
     ##read input data(read-in the data as Pandas framework)
     ##initial(year 0) power plants that are in the system.
-    initial_pp = pd.read_excel("company_initial_profile.xlsx",sheet_name="input_initial_500",header=1)
+    initial_pp = data_initial_pp
     df_pp = deepcopy(initial_pp)
     #characteriztic of new plants (coal,gas,PV,nuclear,wind)
-    new_pp_chioce = pd.read_excel("company_initial_profile.xlsx",sheet_name="new_pp",header=1)
-
+    new_pp_chioce = data_new_pp
+    
     tot_time_step = numyears#total time step is 70 years.
     ts = 0 #currrent time step. start from  0.
     ##in this model version,there are 3 heterogeneous agents who use different hurdle rates.
@@ -241,4 +250,5 @@ def func_ABM(numyears, hr_input):
     return df_pp_grouped
     
 
-capacity_mix = func_ABM(numyears=20, hr_input=[0.06,0.08,0.10])
+capacity_mix = func_ABM(numyears=20, hr_input=[0.06,0.08,0.10],data_file="abm_data.xlsx")
+
