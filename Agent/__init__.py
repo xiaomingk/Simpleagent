@@ -226,7 +226,7 @@ def func_ABM(numyears, hr_input,data_file):
             if invest_made is None:
                 if (dicommision_list['lifetime_remain']==0).any():##if more pp needs to be retired this year.
                     continue
-                else:
+                else:c
                     ts +=1 ##move to next step/year
                     # ~ rounds = 0
                     break 
