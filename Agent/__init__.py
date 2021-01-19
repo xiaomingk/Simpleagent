@@ -7,16 +7,17 @@ from itertools import repeat
 from operator import itemgetter 
 import random
 
-def func_read_in_data(data_file):
-    # ~ df_slice_params = pd.read_excel("slice_param.xlsx",sheet_name="slice_params",header=0,index_col=0)
-    data_slice_params = pd.read_excel(data_file,sheet_name="slice_params",header=0,index_col=0)
-    data_initial_pp = pd.read_excel(data_file,sheet_name="input_initial_500",header=1)
-    data_new_pp = pd.read_excel(data_file,sheet_name="new_pp",header=1)
-
-    return data_slice_params,data_initial_pp,data_new_pp
     
     
 def func_ABM(numyears, hr_input,data_file):
+    def func_read_in_data(data_file):
+    # ~ df_slice_params = pd.read_excel("slice_param.xlsx",sheet_name="slice_params",header=0,index_col=0)
+        data_slice_params = pd.read_excel(data_file,sheet_name="slice_params",header=0,index_col=0)
+        data_initial_pp = pd.read_excel(data_file,sheet_name="input_initial_500",header=1)
+        data_new_pp = pd.read_excel(data_file,sheet_name="new_pp",header=1)
+
+        return data_slice_params,data_initial_pp,data_new_pp
+
     slice_data,data_initial_pp,data_new_pp= func_read_in_data(data_file)
     #part 1. parameters of power plants.
     """
@@ -151,103 +152,106 @@ def func_ABM(numyears, hr_input,data_file):
     annual_capacity = []#make an empty list for later restore: annaul capacity
 
     # =============================================================================
-    if __name__ == "__main__":    
-        while ts < tot_time_step:
-            # ==================================================
-            print('\n' + 'tot=' + str(tot_time_step) +'------Current year is ' + str(ts))
-            carbon_tax = CarbonTax_lst[ts] ##current carbon tax.
-            annual_tot_invest = []# empty lst.
-            df_pp.reset_index(drop=True,inplace=True) ## reset the index of the (Pandas) data-framwork (df).
-            random.shuffle(invest_order)# shuffle the investment order of companies.
-         # =============================================================================    
-        #   1.check decommission and lifetime -1.
-            df_pp.lifetime_remain -= 1 ## the lifetime of each plant is subtract by 1. 
-            df_next_year = df_pp.query('lifetime_remain > 0')##dismentle all retired plants when go to next year.
-            
-            if (df_pp['lifetime_remain']==0).any(): ##if any plant reaches end of its lifetime.
-                dicommision_list = df_pp[df_pp['lifetime_remain']==0].sample(frac=1) ##list the to-be-retire plant to a new df, and shuffle the order by .sample()
-                # ~ print('dicommision_list of current year:')
-                # ~ print(dicommision_list[['name','plant_type','lifetime_remain']])
-            df_pp_grouped = df_pp.groupby('plant_type',as_index=False).agg({'capacity':'sum','running_cost':'mean','emission_intensity':'mean'})##group the pp by plant type.
-            
-            
-            ##=======record capacity for plotting================##
-            # ~ annual_capacity.append(df_pp_grouped['capacity'])
-            # ~ print('annual_capacity is ','\n',annual_capacity)
+       
+    while ts < tot_time_step:
+        # ==================================================
+        print('\n' + 'tot=' + str(tot_time_step) +'------Current year is ' + str(ts))
+        carbon_tax = CarbonTax_lst[ts] ##current carbon tax.
+        annual_tot_invest = []# empty lst.
+        df_pp.reset_index(drop=True,inplace=True) ## reset the index of the (Pandas) data-framwork (df).
+        random.shuffle(invest_order)# shuffle the investment order of companies.
+     # =============================================================================    
+    #   1.check decommission and lifetime -1.
+        df_pp.lifetime_remain -= 1 ## the lifetime of each plant is subtract by 1. 
+        df_next_year = df_pp.query('lifetime_remain > 0')##dismentle all retired plants when go to next year.
+        
+        if (df_pp['lifetime_remain']==0).any(): ##if any plant reaches end of its lifetime.
+            dicommision_list = df_pp[df_pp['lifetime_remain']==0].sample(frac=1) ##list the to-be-retire plant to a new df, and shuffle the order by .sample()
+            # ~ print('dicommision_list of current year:')
+            # ~ print(dicommision_list[['name','plant_type','lifetime_remain']])
+        df_pp_grouped = df_pp.groupby('plant_type',as_index=False).agg({'capacity':'sum','running_cost':'mean','emission_intensity':'mean'})##group the pp by plant type.
+        
+        
+        ##=======record capacity for plotting================##
+        # ~ annual_capacity.append(df_pp_grouped['capacity'])
+        # ~ print('annual_capacity is ','\n',annual_capacity)
 
-            ##====================================================#
-            #2. oder the plant by marginal cost.
-            df_pp_grouped['marginal_cost'] = df_pp_grouped['running_cost'] + carbon_tax * df_pp_grouped['emission_intensity'] #add carbon tax to the marginal_cost.
-            fuel_cost_NatGas = fuel_cost['natural_gas']+ carbon_tax * 0.00045##0.00045=gas_pp['emission_intensity']
-            df_pp_grouped.loc[df_pp_grouped['plant_type'] == 'gas', 'marginal_cost'] = min(fuel_cost_NatGas,fuel_cost['biogas']) ##choose between NG or bio-gas.
-           
-            df_pp_grouped.sort_values('marginal_cost',inplace=True)# sort the plant by it marginal cost (merit order).
-            df_pp_grouped.reset_index(drop=False,inplace=True)
-            
-            plant_order = df_pp_grouped['plant_type'].tolist()# put the merit order in to a list.
-            
+        ##====================================================#
+        #2. oder the plant by marginal cost.
+        df_pp_grouped['marginal_cost'] = df_pp_grouped['running_cost'] + carbon_tax * df_pp_grouped['emission_intensity'] #add carbon tax to the marginal_cost.
+        fuel_cost_NatGas = fuel_cost['natural_gas']+ carbon_tax * 0.00045##0.00045=gas_pp['emission_intensity']
+        df_pp_grouped.loc[df_pp_grouped['plant_type'] == 'gas', 'marginal_cost'] = min(fuel_cost_NatGas,fuel_cost['biogas']) ##choose between NG or bio-gas.
+       
+        df_pp_grouped.sort_values('marginal_cost',inplace=True)# sort the plant by it marginal cost (merit order).
+        df_pp_grouped.reset_index(drop=False,inplace=True)
+        
+        plant_order = df_pp_grouped['plant_type'].tolist()# put the merit order in to a list.
+        
+    # =============================================================================
+    #   3.Making invest decisions.
+        while True:
+            #step 3-1: retired old plants.
+            if dicommision_list.size >0: #if any plant is remain to be decommission.
+                remove_plant = dicommision_list.iloc[-1]# only decommission one at a time.
+                df_pp_grouped.loc[df_pp_grouped['plant_type'] == remove_plant['plant_type'],'capacity'] -= remove_plant['capacity'] ##remove capacity of retired plant.
+                dicommision_list.drop(dicommision_list.index[-1],axis=0, inplace=True)
+            #calculate available capacity at each time slice:
+            df_pp_grouped['avail_capacities'] = [df_pp_grouped.loc[df_pp_grouped['plant_type'] == pp, 'capacity'].values * pp_avail_slice[pp] for pp in plant_order]
+            # ~ print('avail_capacities of wind in each slice is :')
+            # ~ print( df_pp_grouped.loc[df_pp_grouped['plant_type'] == 'wind','avail_capacities'])
         # =============================================================================
-        #   3.Making invest decisions.
-            while True:
-                #step 3-1: retired old plants.
-                if dicommision_list.size >0: #if any plant is remain to be decommission.
-                    remove_plant = dicommision_list.iloc[-1]# only decommission one at a time.
-                    df_pp_grouped.loc[df_pp_grouped['plant_type'] == remove_plant['plant_type'],'capacity'] -= remove_plant['capacity'] ##remove capacity of retired plant.
-                    dicommision_list.drop(dicommision_list.index[-1],axis=0, inplace=True)
-                #calculate available capacity at each time slice:
-                df_pp_grouped['avail_capacities'] = [df_pp_grouped.loc[df_pp_grouped['plant_type'] == pp, 'capacity'].values * pp_avail_slice[pp] for pp in plant_order]
-                # ~ print('avail_capacities of wind in each slice is :')
-                # ~ print( df_pp_grouped.loc[df_pp_grouped['plant_type'] == 'wind','avail_capacities'])
-            # =============================================================================
-                #step 3-2:agents/companies make investment decisions.
-                ##----------------decision-making------------------------------------##
-                # ~ invest_made = func_decision_making(df_pp_grouped,carbon_tax,plant_order) ##investment function: take investment decisions.
-                AvailCapacity_lst = df_pp_grouped['avail_capacities'].tolist() #copy the available capacity to a list.
-                # ~ print('\n' + 'The avail_capacities is: ' + str(avail_capacities))
-                maginal_cost_order = df_pp_grouped['marginal_cost'].tolist()#copy the merit order to a list.
-                ##calculate profit for new pp
-                profit_index = [func_ex_ante_evaluation(pp, plant_order, deepcopy(AvailCapacity_lst), maginal_cost_order) for pp in pp_list]
-                
-                invest_made = None##default investment=None.
-                for compNr in invest_order: #iterate over company list.
-                    pp_index = list(zip(*profit_index))[compNr]
-                    pp_index = sorted(pp_index,key=itemgetter(1), reverse=True) #sort the list by the highest profit.
-                    #print('pp_index ',pp_index)
-                    # ~ pdb.set_trace()
-                    if pp_index[0][1]> 0: # if the profit of the first plant is larger than zero.
-                        invest_made = pp_index[0][0]##invest_made = plant type.then make investment.
-                        break # go to decommision another old plant.
-                    else: continue
-                print('\n' + 'The invest_made is: ' + str(invest_made))
-                ##----------------decision-making module ends------------------------------------##
-                # =============================================================================
-                # ~ print(invest_made)
-                if invest_made is None:
-                    if (dicommision_list['lifetime_remain']==0).any():##if more pp needs to be retired this year.
-                        continue
-                    else:
-                        ts +=1 ##move to next step/year
-                        # ~ rounds = 0
-                        break 
-                else:
-                    df_pp_grouped.loc[df_pp_grouped['plant_type'] == invest_made,'capacity'] += 500000 ##add capacity of invested plant.
-                    annual_tot_invest.append(new_pp_chioce.loc[new_pp_chioce['plant_type'] == invest_made])##append the newly invested plant to the df of the annual investment 'catalog'.
-                    
-                    #investment_list.append(invest_made['plant_type'])
-                    # ~ df_pp = df_pp.append(new_pp_chioce.loc[invest_made],ignore_index=False,sort=False)## append new pp to df.
-                    # ~ count_invest_pp[invest_made.plant_type.item()] += 1
-                    continue
-                
-            annual_tot_invest.append(df_next_year)#append the all the investment from current year to the df.
+            #step 3-2:agents/companies make investment decisions.
+            ##----------------decision-making------------------------------------##
+            # ~ invest_made = func_decision_making(df_pp_grouped,carbon_tax,plant_order) ##investment function: take investment decisions.
+            AvailCapacity_lst = df_pp_grouped['avail_capacities'].tolist() #copy the available capacity to a list.
+            # ~ print('\n' + 'The avail_capacities is: ' + str(avail_capacities))
+            maginal_cost_order = df_pp_grouped['marginal_cost'].tolist()#copy the merit order to a list.
+            ##calculate profit for new pp
+            profit_index = [func_ex_ante_evaluation(pp, plant_order, deepcopy(AvailCapacity_lst), maginal_cost_order) for pp in pp_list]
             
-            df_pp = pd.concat(annual_tot_invest, axis=0, ignore_index=True,sort=False,copy=False)#df concatenate.
-            # ~ print('\n' + 'df_next_year is ------------' + '\n' + str(df_pp))
-            continue
-            # =========================================
-        print('(main module)end')
-
-    return df_pp_grouped
+            invest_made = None##default investment=None.
+            for compNr in invest_order: #iterate over company list.
+                pp_index = list(zip(*profit_index))[compNr]
+                pp_index = sorted(pp_index,key=itemgetter(1), reverse=True) #sort the list by the highest profit.
+                #print('pp_index ',pp_index)
+                # ~ pdb.set_trace()
+                if pp_index[0][1]> 0: # if the profit of the first plant is larger than zero.
+                    invest_made = pp_index[0][0]##invest_made = plant type.then make investment.
+                    break # go to decommision another old plant.
+                else: continue
+            print('\n' + 'The invest_made is: ' + str(invest_made))
+            ##----------------decision-making module ends------------------------------------##
+            # =============================================================================
+            # ~ print(invest_made)
+            if invest_made is None:
+                if (dicommision_list['lifetime_remain']==0).any():##if more pp needs to be retired this year.
+                    continue
+                else:
+                    ts +=1 ##move to next step/year
+                    # ~ rounds = 0
+                    break 
+            else:
+                df_pp_grouped.loc[df_pp_grouped['plant_type'] == invest_made,'capacity'] += 500000 ##add capacity of invested plant.
+                annual_tot_invest.append(new_pp_chioce.loc[new_pp_chioce['plant_type'] == invest_made])##append the newly invested plant to the df of the annual investment 'catalog'.
+                
+                #investment_list.append(invest_made['plant_type'])
+                # ~ df_pp = df_pp.append(new_pp_chioce.loc[invest_made],ignore_index=False,sort=False)## append new pp to df.
+                # ~ count_invest_pp[invest_made.plant_type.item()] += 1
+                continue
+            
+        annual_tot_invest.append(df_next_year)#append the all the investment from current year to the df.
+        
+        df_pp = pd.concat(annual_tot_invest, axis=0, ignore_index=True,sort=False,copy=False)#df concatenate.
+        # ~ print('\n' + 'df_next_year is ------------' + '\n' + str(df_pp))
+        continue
+        # =========================================
+    print('(main module)end')
+    print('The final capacity mix at year ',str(tot_time_step),' is')
+    
+    final_capacity=deepcopy(df_pp_grouped)
+    print(final_capacity.loc[:,['plant_type','capacity']])
+    return final_capacity
     
 
-#capacity_mix = func_ABM(numyears=20, hr_input=[0.06,0.08,0.10],data_file="abm_data.xlsx")
+capacity_mix = func_ABM(numyears=20, hr_input=[0.06,0.08,0.10],data_file="abm_data.xlsx")
 
