@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name='Agent',
-    version='0.0.6',
+    version='0.0.7',
     description='My agent based model package',
     url='https://github.com/xiaomingk/Simpleagent.it',
     author='Xiaoming Kan',
