@@ -245,8 +245,7 @@ def func_ABM(numyears, hr_input,data_file):
             continue
             # =========================================
         print('(main module)end')
-        print('The final capacity mix at year ',str(tot_time_step),' is')
-        print(df_pp_grouped.loc[:,['plant_type','capacity']])
+
     return df_pp_grouped
     
 
