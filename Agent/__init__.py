@@ -249,5 +249,5 @@ def func_ABM(numyears, hr_input,data_file):
     return df_pp_grouped
     
 
-capacity_mix = func_ABM(numyears=20, hr_input=[0.06,0.08,0.10],data_file="abm_data.xlsx")
+#capacity_mix = func_ABM(numyears=20, hr_input=[0.06,0.08,0.10],data_file="abm_data.xlsx")
 
