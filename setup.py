@@ -11,5 +11,5 @@ setup(
     packages=['Agent'],
     zip_safe=False,
     include_package_data=True,
-    package_data={'': ['data/*.xlsx']},
+    package_data={'Agent': ['abm_data.xlsx']},
 )
