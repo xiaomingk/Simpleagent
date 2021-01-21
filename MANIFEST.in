@@ -1,4 +1,4 @@
 include *.in
 include *.xlsx
 recursive-include Agent *.py
-recursive-include Agent *.txt
+recursive-include Agent *.xlsx
