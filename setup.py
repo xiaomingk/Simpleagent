@@ -9,5 +9,7 @@ setup(
     author_email='kanx@chalmers.se',
     license='unlicense',
     packages=['Agent'],
-    zip_safe=False
+    zip_safe=False,
+    include_package_data=True,
+    package_data={'': ['data/*.xlsx']},
 )
